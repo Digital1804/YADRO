@@ -1,4 +1,6 @@
 .vscode
 *.txt
+!test.txt
 *.exe
 *.o
+main
