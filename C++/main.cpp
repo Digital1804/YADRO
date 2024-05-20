@@ -71,6 +71,7 @@ private:
     int table_id;
 };
 
+
 int timeToInt(string time){
     int hours = stoi(time.substr(0, 2));
     int minutes = stoi(time.substr(3, 2));
@@ -83,10 +84,9 @@ string intToTime(int time){
     return to_string(hours) + ":" + to_string(minutes);
 }
 
-void freeTable(Table table){
-    table.setIsFree(true);
+int timeOnTable(Custumer Custumer, string end_time){
+    return timeToInt(end_time) - timeToInt(Custumer.getStartTime());
 }
-
 int findCustumerID(vector<Custumer> custumers, string name){
     for (int i = 0; i < custumers.size(); i++){
         if (custumers[i].getName() == name){
@@ -158,12 +158,18 @@ string requests_handler(vector<Table> &tables, vector<Custumer> &custumers, stri
                 res += start_time + ' ' + "13 ClientUnknown\n";
             }
             else{
-                
-                cust_name = custumers[0].getName();
-                custumers.erase(custumers.begin());
-                custumers[cust_id].setTableId(table_id);
-                custumers[cust_id].setStartTime(start_time);
-                tables[table_id-1].setIsFree(false);
+                table_id = custumers[cust_id].getTableId();
+                tables[table_id-1].addTotalTime(timeOnTable(custumers[cust_id], line.substr(5)));
+                tables[table_id-1].setIsFree(true);
+                custumers.erase(custumers.begin()+cust_id);
+                if (queue.size() > 0){
+                    cust_name = custumers[0].getName();
+                    custumers.erase(custumers.begin());
+                    cust_id = findCustumerID(custumers, cust_name);
+                    custumers[cust_id].setTableId(table_id);
+                    custumers[cust_id].setStartTime(start_time);
+                    tables[table_id-1].setIsFree(false);
+                }
             }
             break;
         default:
@@ -173,7 +179,7 @@ string requests_handler(vector<Table> &tables, vector<Custumer> &custumers, stri
 }
 
 int main(int argc, char *argv[]){
-    ifstream myfile(argv[1]);
+    ifstream myfile("test.txt");//argv[1]);
     ofstream myfile2("out.txt");
     int count_of_tables, price;
     string begin_time, end_time, line, var;  
@@ -181,14 +187,15 @@ int main(int argc, char *argv[]){
     vector<Custumer> custumers;
     vector<string> queue;
     int i = 0;
-    if (myfile.is_open())
-    {
+    if (myfile.is_open()){
         getline(myfile, var);
         count_of_tables = stoi(var);
+        cout << "1";
         getline(myfile, begin_time, ' ');
         getline(myfile, end_time);
         getline(myfile, var);
         price = stoi(var);
+        cout << "2";
         for (int i = 0; i < count_of_tables; i++){
             tables.push_back(Table(i+1, price));
         }
@@ -196,6 +203,7 @@ int main(int argc, char *argv[]){
         while (getline(myfile, line)){
             myfile2 << requests_handler(tables, custumers, line, begin_time, end_time, count_of_tables, queue);
         }
+        // cout << "Line " << ++i << ": " << line << endl;
         myfile2 << end_time << '\n';
         myfile.close();
         myfile2.close();
