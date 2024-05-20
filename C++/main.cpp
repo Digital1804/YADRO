@@ -7,9 +7,8 @@ using namespace std;
 
 class Table{
 public:
-    Table(int id, int price){
+    Table(int id){
         this->id = id;
-        this->price = price;
         this->isFree = true;
         this->total_time = 0;
         this->total_price = 0;
@@ -40,7 +39,7 @@ public:
         this->total_time += time;
     }
 private:
-    int id, total_time, total_price, price;
+    int id, total_time, total_price;
     bool isFree;
 };
 
@@ -124,6 +123,7 @@ int countFreeTables(vector<Table> tables){
 int countPrice(int time, int price){
     return (time/60+1) * price;
 }
+
 string requests_handler(vector<Table> &tables, vector<Customer> &customers, string line, string begin_time, string end_time, int count_of_tables, vector<string> &queue){
     string start_time = line.substr(0, 5);
     string res, cust_name;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]){
         getline(myfile, var);
         price = stoi(var);
         for (int i = 0; i < count_of_tables; i++){
-            tables.push_back(Table(i, price));
+            tables.push_back(Table(i));
         }
         myfile2 << begin_time << '\n';
         while (getline(myfile, line)){
